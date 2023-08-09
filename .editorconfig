@@ -1,0 +1,10 @@
+root = true
+
+[*]
+max_line_length = 200
+indent_style = space
+end_of_line = lf
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+ij_any_keep_blank_lines_in_code = 1
