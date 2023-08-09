@@ -35,26 +35,30 @@ public class BoardManager {
     final var playerTwoBase = Integer.valueOf(this.board.pits().length - 1);
     validateMoveFrom(pit, playerOneBase, playerTwoBase);
     var stones = board.pits()[pit];
+    Integer lastModifiedPitStoneCount = null;
     board.pits()[pit] = 0;
     while (stones > 0) {
       ++pit;
-      if ((this.player.equals(Player.ONE) && pit.equals(playerTwoBase)) ||
-        (this.player.equals(Player.TWO) && pit.equals(playerOneBase)))
+      if ((this.player.equals(Player.ONE) && pit.equals(playerTwoBase)) || (this.player.equals(Player.TWO) && pit.equals(playerOneBase)))
         ++pit;
       if (pit >= board.pits().length) pit = 0;
       stones--;
+      lastModifiedPitStoneCount = board.pits()[pit];
       board.pits()[pit]++;
     }
+    captureDependningOn(pit, lastModifiedPitStoneCount);
     this.player = Player.TWO;
     return board;
   }
 
+  private void captureDependningOn(Integer lastModifiedPit, Integer stoneCount) {
+    
+  }
+
   private void validateMoveFrom(Integer pit, Integer playerOneBase, Integer playerTwoBase) throws BoardMoveException {
-    if ((this.player.equals(Player.ONE) && pit.equals(playerOneBase)) ||
-      (this.player.equals(Player.TWO) && pit.equals(playerTwoBase)))
+    if ((this.player.equals(Player.ONE) && pit.equals(playerOneBase)) || (this.player.equals(Player.TWO) && pit.equals(playerTwoBase)))
       throw new BoardMoveException("The stones at the base should not be moved.");
-    if ((this.player.equals(Player.ONE) && pit > playerOneBase) ||
-      (this.player.equals(Player.TWO) && pit <= playerOneBase))
+    if ((this.player.equals(Player.ONE) && pit > playerOneBase) || (this.player.equals(Player.TWO) && pit <= playerOneBase))
       throw new BoardMoveException("Those stones are not yours to move.");
   }
 }

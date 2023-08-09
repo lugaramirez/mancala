@@ -128,16 +128,37 @@ class BoardManagerTest {
     }
 
     @Test
-    //this should actually capture!
     void moving_stones_from_player_one_pit_skips_second_player_base_pit_and_rotates() {
+      final var initialization = new Integer[] { 2, 4, 0, 2, 2, 0 };
+      final var result = new Integer[] { 3, 0, 1, 3, 3, 0 };
+
+      sut.initialize(initialization);
+      final var moved = sut.moveStonesFrom(1);
+
+      assertThat(moved.pits()).containsExactly(result);
+    }
+
+    @Test
+    void landing_on_own_empty_pit_captures_opponents_stones() {
         final var initialization = new Integer[] { 2, 5, 0, 2, 2, 0 };
-        final var result = new Integer[] { 3, 1, 1, 3, 3, 0 };
+        final var result = new Integer[] { 3, 1, 4, 3, 0, 0 };
 
         sut.initialize(initialization);
-
         final var moved = sut.moveStonesFrom(1);
 
         assertThat(moved.pits()).containsExactly(result);
+    }
+
+    @Test
+    void landing_on_opposing_empty_pit_does_not_capture() {
+      final var initialization = new Integer[] { 3, 3, 0, 3, 3, 0 };
+      final var result = new Integer[] { 4, 1, 1, 0, 5, 1 };
+
+      sut.initialize(initialization);
+      sut.moveStonesFrom(1);
+      final var moved = sut.moveStonesFrom(3);
+
+      assertThat(moved.pits()).containsExactly(result);
     }
 
     @Test
