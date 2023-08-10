@@ -162,17 +162,6 @@ class BoardManagerTest {
     }
 
     @Test
-    void moving_stones_from_player_one_pit_skips_second_player_base_pit_and_rotates() {
-      final var initialization = new Integer[]{2, 4, 0, 2, 2, 0};
-      final var result = new Integer[]{3, 0, 1, 3, 3, 0};
-
-      sut.initialize(initialization);
-      final var moved = sut.moveStonesFrom(1);
-
-      assertThat(moved.pits()).containsExactly(result);
-    }
-
-    @Test
     void landing_on_own_empty_pit_captures_opponents_stones_for_player_one() {
       final var initialization = new Integer[]{2, 5, 0, 2, 2, 0};
       final var result = new Integer[]{3, 1, 4, 3, 0, 0};
@@ -208,7 +197,18 @@ class BoardManagerTest {
     }
 
     @Test
-    void moving_stones_from_player_two_pit_skips_second_player_base_pit_and_rotates() {
+    void moving_stones_from_player_one_pit_skips_second_player_base_pit_and_rotates() {
+      final var initialization = new Integer[]{2, 4, 0, 2, 2, 0};
+      final var result = new Integer[]{3, 0, 1, 3, 3, 0};
+
+      sut.initialize(initialization);
+      final var moved = sut.moveStonesFrom(1);
+
+      assertThat(moved.pits()).containsExactly(result);
+    }
+
+    @Test
+    void moving_stones_from_player_two_pit_rotates_and_skips_first_player_base_pit() {
       final var initialization = new Integer[]{2, 2, 0, 2, 4, 0};
       final var result = new Integer[]{3, 1, 1, 4, 0, 1};
 
