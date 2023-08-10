@@ -34,6 +34,7 @@ public class BoardManager {
     final var playerOneBase = Integer.valueOf(this.board.pits().length / 2 - 1);
     final var playerTwoBase = Integer.valueOf(this.board.pits().length - 1);
     validateMoveFrom(pit, playerOneBase, playerTwoBase);
+
     var stones = this.board.pits()[pit];
     Integer lastModifiedPitStoneCount = null;
     this.board.pits()[pit] = 0;
@@ -46,11 +47,19 @@ public class BoardManager {
       lastModifiedPitStoneCount = this.board.pits()[pit];
       this.board.pits()[pit]++;
     }
+
+    captureStonesIfApplicable(pit, playerOneBase, playerTwoBase, lastModifiedPitStoneCount);
+    rotatePlayer();
+    return board;
+  }
+
+  private void captureStonesIfApplicable(Integer pit, Integer playerOneBase, Integer playerTwoBase, Integer lastModifiedPitStoneCount) {
     if (!pit.equals(playerOneBase) && !pit.equals(playerTwoBase) &&
       lastModifiedPitStoneCount != null && lastModifiedPitStoneCount.equals(0) &&
       ((this.player.equals(Player.ONE) && pit < playerOneBase) || (this.player.equals(Player.TWO) && pit > playerOneBase))
     ) {
       var capturedPit = switch (this.player) {
+        // oh, math... Y U DO BE LIKE DAT?!
         case ONE -> pit + playerOneBase + 1;
         case TWO -> pit - playerOneBase - 1;
       };
@@ -61,11 +70,13 @@ public class BoardManager {
         case TWO -> this.board.pits()[playerTwoBase] += capturedStones;
       }
     }
+  }
+
+  private void rotatePlayer() {
     this.player = switch (this.player) {
       case ONE -> Player.TWO;
       case TWO -> Player.ONE;
     };
-    return board;
   }
 
   private void validateMoveFrom(Integer pit, Integer playerOneBase, Integer playerTwoBase) throws BoardMoveException {
