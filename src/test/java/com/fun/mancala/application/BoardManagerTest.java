@@ -138,6 +138,30 @@ class BoardManagerTest {
     }
 
     @Test
+    void landing_on_base_pit_should_repeat_turn_for_player_one() {
+      final var initialization = new Integer[]{2, 2, 0, 2, 2, 0};
+
+      sut.initialize(initialization);
+      sut.moveStonesFrom(0);
+      assertThatThrownBy(() -> sut.moveStonesFrom(4))
+        .isInstanceOf(BoardMoveException.class)
+        .hasMessage("Those stones are not yours to move.");
+    }
+
+    @Test
+    void landing_on_base_pit_should_repeat_turn_for_player_two() {
+      final var initialization = new Integer[]{2, 2, 0, 1, 2, 0};
+
+      sut.initialize(initialization);
+      sut.moveStonesFrom(1);
+      sut.moveStonesFrom(3);
+      assertThatThrownBy(() -> sut.moveStonesFrom(0))
+        .isInstanceOf(BoardMoveException.class)
+        .hasMessage("Those stones are not yours to move.");
+
+    }
+
+    @Test
     void moving_stones_from_player_one_pit_skips_second_player_base_pit_and_rotates() {
       final var initialization = new Integer[]{2, 4, 0, 2, 2, 0};
       final var result = new Integer[]{3, 0, 1, 3, 3, 0};
@@ -184,7 +208,6 @@ class BoardManagerTest {
     }
 
     @Test
-      //this should actually repeat turn!
     void moving_stones_from_player_two_pit_skips_second_player_base_pit_and_rotates() {
       final var initialization = new Integer[]{2, 2, 0, 2, 4, 0};
       final var result = new Integer[]{3, 1, 1, 4, 0, 1};

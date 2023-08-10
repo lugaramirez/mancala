@@ -51,7 +51,7 @@ public class BoardManager {
     }
 
     captureStonesIfApplicable(pit, playerOneBase, playerTwoBase, lastModifiedPitStoneCount);
-    rotatePlayer();
+    rotatePlayerIfApplicable(pit, playerOneBase, playerTwoBase);
     return board;
   }
 
@@ -74,11 +74,14 @@ public class BoardManager {
     }
   }
 
-  private void rotatePlayer() {
-    this.player = switch (this.player) {
-      case ONE -> Player.TWO;
-      case TWO -> Player.ONE;
-    };
+  private void rotatePlayerIfApplicable(Integer pit, Integer playerOneBase, Integer playerTwoBase) {
+    if ((this.player.equals(Player.ONE) && !pit.equals(playerOneBase)) ||
+      (this.player.equals(Player.TWO) && !pit.equals(playerTwoBase))) {
+      this.player = switch (this.player) {
+        case ONE -> Player.TWO;
+        case TWO -> Player.ONE;
+      };
+    }
   }
 
   private void validateMoveFrom(Integer pit, Integer playerOneBase, Integer playerTwoBase) throws BoardMoveException {
