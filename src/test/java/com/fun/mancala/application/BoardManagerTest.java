@@ -1,5 +1,7 @@
 package com.fun.mancala.application;
 
+import com.fun.mancala.application.exceptions.BoardInitializationException;
+import com.fun.mancala.application.exceptions.BoardMoveException;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 

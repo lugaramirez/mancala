@@ -1,5 +1,7 @@
 package com.fun.mancala.application;
 
+import com.fun.mancala.application.exceptions.BoardInitializationException;
+import com.fun.mancala.application.exceptions.BoardMoveException;
 import com.fun.mancala.domain.models.Board;
 import com.fun.mancala.domain.models.Player;
 
