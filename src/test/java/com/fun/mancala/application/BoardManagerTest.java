@@ -27,6 +27,7 @@ class BoardManagerTest {
       final var boardTooSmall = new Integer[]{1, 0, 1, 0};
       final var wrongAmountOfEmptyPits = new Integer[]{1, 1, 0, 1, 0, 0};
       final var badlyPositionedEmptyPits = new Integer[]{1, 1, 0, 0, 1, 1};
+      final var goodBoard = new Integer[]{1, 1, 0, 1, 1, 0};
 
       assertThatThrownBy(() -> sut.initialize(oddNumberOfPits))
         .isInstanceOf(BoardInitializationException.class)
@@ -40,6 +41,12 @@ class BoardManagerTest {
       assertThatThrownBy(() -> sut.initialize(badlyPositionedEmptyPits))
         .isInstanceOf(BoardInitializationException.class)
         .hasMessage("The board should have only two empty pits at the right of each player.");
+      assertThatThrownBy(() -> {
+        sut.initialize(goodBoard);
+        sut.initialize(goodBoard);
+      })
+        .isInstanceOf(BoardInitializationException.class)
+        .hasMessage("The board is already initialized.");
     }
   }
 
@@ -139,7 +146,7 @@ class BoardManagerTest {
     }
 
     @Test
-    void landing_on_own_empty_pit_captures_opponents_stones() {
+    void landing_on_own_empty_pit_captures_opponents_stones_for_player_one() {
         final var initialization = new Integer[] { 2, 5, 0, 2, 2, 0 };
         final var result = new Integer[] { 3, 1, 4, 3, 0, 0 };
 
@@ -147,6 +154,20 @@ class BoardManagerTest {
         final var moved = sut.moveStonesFrom(1);
 
         assertThat(moved.pits()).containsExactly(result);
+    }
+
+    @Test
+    void landing_on_own_empty_pit_captures_opponents_stones_for_player_two() {
+      final var initialization = new Integer[] { 2, 2, 0, 2, 5, 0 };
+      // 1 { 2, 0, 1, 3, 5, 0 }
+      // 4 { 3, 0, 1, 4, 1, 2 }
+      final var result = new Integer[] { 3, 0, 1, 4, 1, 2 };
+
+      sut.initialize(initialization);
+      sut.moveStonesFrom(1);
+      final var moved = sut.moveStonesFrom(4);
+
+      assertThat(moved.pits()).containsExactly(result);
     }
 
     @Test
@@ -164,8 +185,8 @@ class BoardManagerTest {
     @Test
     //this should actually repeat turn!
     void moving_stones_from_player_two_pit_skips_second_player_base_pit_and_rotates() {
-      final var initialization = new Integer[] { 2, 5, 0, 2, 5, 0 };
-      final var result = new Integer[] { 4, 2, 1, 4, 1, 2 };
+      final var initialization = new Integer[] { 2, 2, 0, 2, 4, 0 };
+      final var result = new Integer[] { 3, 1, 1, 4, 0, 1 };
 
       sut.initialize(initialization);
       sut.moveStonesFrom(1);

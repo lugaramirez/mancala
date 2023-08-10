@@ -34,25 +34,38 @@ public class BoardManager {
     final var playerOneBase = Integer.valueOf(this.board.pits().length / 2 - 1);
     final var playerTwoBase = Integer.valueOf(this.board.pits().length - 1);
     validateMoveFrom(pit, playerOneBase, playerTwoBase);
-    var stones = board.pits()[pit];
+    var stones = this.board.pits()[pit];
     Integer lastModifiedPitStoneCount = null;
-    board.pits()[pit] = 0;
+    this.board.pits()[pit] = 0;
     while (stones > 0) {
       ++pit;
       if ((this.player.equals(Player.ONE) && pit.equals(playerTwoBase)) || (this.player.equals(Player.TWO) && pit.equals(playerOneBase)))
         ++pit;
-      if (pit >= board.pits().length) pit = 0;
+      if (pit >= this.board.pits().length) pit = 0;
       stones--;
-      lastModifiedPitStoneCount = board.pits()[pit];
-      board.pits()[pit]++;
+      lastModifiedPitStoneCount = this.board.pits()[pit];
+      this.board.pits()[pit]++;
     }
-    captureDependningOn(pit, lastModifiedPitStoneCount);
-    this.player = Player.TWO;
+    if (!pit.equals(playerOneBase) && !pit.equals(playerTwoBase) &&
+      lastModifiedPitStoneCount != null && lastModifiedPitStoneCount.equals(0) &&
+      ((this.player.equals(Player.ONE) && pit < playerOneBase) || (this.player.equals(Player.TWO) && pit > playerOneBase))
+    ) {
+      var capturedPit = switch (this.player) {
+        case ONE -> pit + playerOneBase + 1;
+        case TWO -> pit - playerOneBase - 1;
+      };
+      var capturedStones = this.board.pits()[capturedPit];
+      this.board.pits()[capturedPit] = 0;
+      switch (this.player) {
+        case ONE -> this.board.pits()[playerOneBase] += capturedStones;
+        case TWO -> this.board.pits()[playerTwoBase] += capturedStones;
+      }
+    }
+    this.player = switch (this.player) {
+      case ONE -> Player.TWO;
+      case TWO -> Player.ONE;
+    };
     return board;
-  }
-
-  private void captureDependningOn(Integer lastModifiedPit, Integer stoneCount) {
-    
   }
 
   private void validateMoveFrom(Integer pit, Integer playerOneBase, Integer playerTwoBase) throws BoardMoveException {
