@@ -5,13 +5,17 @@ import com.fun.mancala.application.exceptions.BoardMoveException;
 import com.fun.mancala.domain.models.Board;
 import com.fun.mancala.domain.models.Player;
 import com.fun.mancala.domain.models.Status;
+import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
 
 import static com.fun.mancala.domain.models.Player.ONE;
 import static com.fun.mancala.domain.models.Player.TWO;
 import static com.fun.mancala.domain.models.Status.DONE;
 import static com.fun.mancala.domain.models.Status.PLAYABLE;
 
-public class BoardManager {
+@Service
+public class GameManager {
   private Board board;
   private Player player;
   private Status status;
@@ -63,6 +67,17 @@ public class BoardManager {
     return board;
   }
 
+  private void validateMoveFrom(Integer pit, Integer playerOneBase, Integer playerTwoBase) throws BoardMoveException {
+    if (this.status.equals(DONE))
+      throw new BoardMoveException("Game has ended. Player " + this.player + " won.");
+    if ((this.player.equals(ONE) && pit.equals(playerOneBase)) || (this.player.equals(TWO) && pit.equals(playerTwoBase)))
+      throw new BoardMoveException("The stones at the base should not be moved.");
+    if ((this.player.equals(ONE) && pit > playerOneBase) || (this.player.equals(TWO) && pit <= playerOneBase))
+      throw new BoardMoveException("Those stones are not yours to move.");
+    if (this.board.pits()[pit].equals(0))
+      throw new BoardMoveException("Choose a pit with stones.");
+  }
+
   private void captureStonesIfApplicable(Integer pit, Integer playerOneBase, Integer playerTwoBase, Integer lastModifiedPitStoneCount) {
     if (!pit.equals(playerOneBase) && !pit.equals(playerTwoBase) &&
       lastModifiedPitStoneCount != null && lastModifiedPitStoneCount.equals(0) &&
@@ -85,12 +100,12 @@ public class BoardManager {
 
   private void rotatePlayerIfApplicable(Integer pit, Integer playerOneBase, Integer playerTwoBase) {
     var stonesOnPlayerOnePits = 0;
-    var stonesOnPlayertwoPits = 0;
+    var stonesOnPlayerTwoPits = 0;
     for (int i = 0; i < playerOneBase; i++) {
       stonesOnPlayerOnePits += this.board.pits()[i];
-      stonesOnPlayertwoPits += this.board.pits()[i + playerOneBase + 1];
+      stonesOnPlayerTwoPits += this.board.pits()[i + playerOneBase + 1];
     }
-    if (stonesOnPlayerOnePits == 0 || stonesOnPlayertwoPits == 0) {
+    if (stonesOnPlayerOnePits == 0 || stonesOnPlayerTwoPits == 0) {
       this.status = DONE;
     } else {
       if ((this.player.equals(ONE) && !pit.equals(playerOneBase)) ||
@@ -103,14 +118,39 @@ public class BoardManager {
     }
   }
 
-  private void validateMoveFrom(Integer pit, Integer playerOneBase, Integer playerTwoBase) throws BoardMoveException {
-    if (this.status.equals(DONE))
-      throw new BoardMoveException("Game has ended. Player " + this.player + " won.");
-    if ((this.player.equals(ONE) && pit.equals(playerOneBase)) || (this.player.equals(TWO) && pit.equals(playerTwoBase)))
-      throw new BoardMoveException("The stones at the base should not be moved.");
-    if ((this.player.equals(ONE) && pit > playerOneBase) || (this.player.equals(TWO) && pit <= playerOneBase))
-      throw new BoardMoveException("Those stones are not yours to move.");
-    if (this.board.pits()[pit].equals(0))
-      throw new BoardMoveException("Choose a pit with stones.");
+  public String gameStatus() {
+    final var status = this.status.equals(PLAYABLE)? "Current" : "Final";
+    final var playerOneBase = Integer.valueOf(this.board.pits().length / 2 - 1);
+    final var playerTwoBase = Integer.valueOf(this.board.pits().length - 1);
+    final var playerOneScore = this.board.pits()[playerOneBase];
+    final var playerTwoScore = this.board.pits()[playerTwoBase];
+    StringBuilder playerOneBoard = new StringBuilder();
+    StringBuilder playerTwoBoard = new StringBuilder();
+    for (int i = 0; i < playerOneBase; i++) {
+      playerOneBoard.append("| %d ".formatted(this.board.pits()[i]));
+      playerTwoBoard.append("| %d ".formatted(this.board.pits()[i + playerOneBase + 1]));
+    }
+    playerOneBoard.append("|| %d |".formatted(this.board.pits()[playerOneBase]));
+    playerTwoBoard.append("|| %d |".formatted(this.board.pits()[playerTwoBase]));
+    return """
+      %s Board:
+        Player ONE: %s
+        Player TWO: %s
+      %s Score:
+        Player ONE: %d
+        Player TWO: %d
+      %s Player: %s
+      Game: %s
+      """.formatted(
+      status,
+      playerOneBoard.toString(),
+      playerTwoBoard.toString(),
+      status,
+      playerOneScore,
+      playerTwoScore,
+      status,
+      this.player,
+      this.status
+    );
   }
 }

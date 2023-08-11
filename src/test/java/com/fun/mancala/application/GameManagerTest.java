@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class BoardManagerTest {
-  final private BoardManager sut = new BoardManager();
+class GameManagerTest {
+  final private GameManager sut = new GameManager();
 
   @Nested
   class BoardInitialization {
@@ -278,6 +278,90 @@ class BoardManagerTest {
         .isInstanceOf(BoardMoveException.class)
         .hasMessage("Game has ended. Player TWO won.");
       assertThat(moved.pits()).containsExactly(result);
+    }
+  }
+
+  @Nested
+  class ReportGameStatus {
+    @Test
+    void game_status_playable_game_player_one_turn() {
+      final var initialization = new Integer[]{1, 1, 0, 1, 1, 0};
+
+      sut.initialize(initialization);
+      sut.moveStonesFrom(1);
+
+      assertThat(sut.gameStatus()).isEqualTo("""
+        Current Board:
+          Player ONE: | 1 | 0 || 1 |
+          Player TWO: | 1 | 1 || 0 |
+        Current Score:
+          Player ONE: 1
+          Player TWO: 0
+        Current Player: ONE
+        Game: PLAYABLE
+        """);
+    }
+
+    @Test
+    void game_status_playable_game_player_two_turn() {
+      final var initialization = new Integer[]{1, 1, 0, 1, 1, 0};
+
+      sut.initialize(initialization);
+      sut.moveStonesFrom(0);
+
+      assertThat(sut.gameStatus()).isEqualTo("""
+        Current Board:
+          Player ONE: | 0 | 2 || 0 |
+          Player TWO: | 1 | 1 || 0 |
+        Current Score:
+          Player ONE: 0
+          Player TWO: 0
+        Current Player: TWO
+        Game: PLAYABLE
+        """);
+    }
+
+    @Test
+    void game_status_done_player_one_wins() {
+      final var initialization = new Integer[]{2, 1, 0, 1, 1, 0};
+
+      sut.initialize(initialization);
+      sut.moveStonesFrom(1);
+      sut.moveStonesFrom(0);
+      sut.moveStonesFrom(1);
+
+      assertThat(sut.gameStatus()).isEqualTo("""
+        Final Board:
+          Player ONE: | 0 | 0 || 3 |
+          Player TWO: | 1 | 1 || 0 |
+        Final Score:
+          Player ONE: 3
+          Player TWO: 0
+        Final Player: ONE
+        Game: DONE
+        """);
+    }
+
+    @Test
+    void game_status_done_player_two_wins() {
+      final var initialization = new Integer[]{1, 2, 0, 1, 1, 0};
+
+      sut.initialize(initialization);
+      sut.moveStonesFrom(1);
+      sut.moveStonesFrom(4);
+      sut.moveStonesFrom(3);
+      sut.moveStonesFrom(4);
+
+      assertThat(sut.gameStatus()).isEqualTo("""
+        Final Board:
+          Player ONE: | 1 | 0 || 1 |
+          Player TWO: | 0 | 0 || 3 |
+        Final Score:
+          Player ONE: 1
+          Player TWO: 3
+        Final Player: TWO
+        Game: DONE
+        """);
     }
   }
 }
