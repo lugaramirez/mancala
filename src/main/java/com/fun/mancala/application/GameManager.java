@@ -7,8 +7,6 @@ import com.fun.mancala.domain.models.Player;
 import com.fun.mancala.domain.models.Status;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-
 import static com.fun.mancala.domain.models.Player.ONE;
 import static com.fun.mancala.domain.models.Player.TWO;
 import static com.fun.mancala.domain.models.Status.DONE;
@@ -119,7 +117,7 @@ public class GameManager {
   }
 
   public String gameStatus() {
-    final var status = this.status.equals(PLAYABLE)? "Current" : "Final";
+    final var gameStatus = this.status.equals(PLAYABLE)? "Current" : "Final";
     final var playerOneBase = Integer.valueOf(this.board.pits().length / 2 - 1);
     final var playerTwoBase = Integer.valueOf(this.board.pits().length - 1);
     final var playerOneScore = this.board.pits()[playerOneBase];
@@ -142,13 +140,13 @@ public class GameManager {
       %s Player: %s
       Game: %s
       """.formatted(
-      status,
+      gameStatus,
       playerOneBoard.toString(),
       playerTwoBoard.toString(),
-      status,
+      gameStatus,
       playerOneScore,
       playerTwoScore,
-      status,
+      gameStatus,
       this.player,
       this.status
     );
