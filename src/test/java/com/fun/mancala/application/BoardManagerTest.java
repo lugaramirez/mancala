@@ -126,6 +126,31 @@ class BoardManagerTest {
   @Nested
   class ComplexMovement {
     @Test
+    void player_one_plays_a_pit_without_stones() {
+      final var initialization = new Integer[]{1, 1, 0, 1, 1, 0};
+
+      sut.initialize(initialization);
+      sut.moveStonesFrom(1);
+
+      assertThatThrownBy(() -> sut.moveStonesFrom(1))
+        .isInstanceOf(BoardMoveException.class)
+        .hasMessage("Choose a pit with stones.");
+    }
+
+    @Test
+    void player_two_plays_a_pit_without_stones() {
+      final var initialization = new Integer[]{1, 1, 0, 1, 1, 0};
+
+      sut.initialize(initialization);
+      sut.moveStonesFrom(0);
+      sut.moveStonesFrom(4);
+
+      assertThatThrownBy(() -> sut.moveStonesFrom(4))
+        .isInstanceOf(BoardMoveException.class)
+        .hasMessage("Choose a pit with stones.");
+    }
+
+    @Test
     void moving_stones_from_last_pit_rotates_to_first_player_pit() {
       final var initialization = new Integer[]{2, 2, 0, 2, 2, 0};
       final var result = new Integer[]{3, 0, 1, 3, 0, 1};
@@ -164,7 +189,7 @@ class BoardManagerTest {
     @Test
     void landing_on_own_empty_pit_captures_opponents_stones_for_player_one() {
       final var initialization = new Integer[]{2, 5, 0, 2, 2, 0};
-      final var result = new Integer[]{3, 1, 4, 3, 0, 0};
+      final var result = new Integer[]{3, 0, 5, 3, 0, 0};
 
       sut.initialize(initialization);
       final var moved = sut.moveStonesFrom(1);
@@ -175,7 +200,7 @@ class BoardManagerTest {
     @Test
     void landing_on_own_empty_pit_captures_opponents_stones_for_player_two() {
       final var initialization = new Integer[]{2, 2, 0, 2, 5, 0};
-      final var result = new Integer[]{3, 0, 1, 4, 1, 2};
+      final var result = new Integer[]{3, 0, 1, 4, 0, 3};
 
       sut.initialize(initialization);
       sut.moveStonesFrom(1);
@@ -216,6 +241,42 @@ class BoardManagerTest {
       sut.moveStonesFrom(1);
       final var moved = sut.moveStonesFrom(4);
 
+      assertThat(moved.pits()).containsExactly(result);
+    }
+  }
+
+  @Nested
+  class EndGameCondition {
+    @Test
+    void player_one_wins() {
+      final var initialization = new Integer[]{2, 1, 0, 1, 1, 0};
+      final var result = new Integer[]{0, 0, 3, 1, 1, 0};
+
+      sut.initialize(initialization);
+      sut.moveStonesFrom(1);
+      sut.moveStonesFrom(0);
+      final var moved = sut.moveStonesFrom(1);
+
+      assertThatThrownBy(() -> sut.moveStonesFrom(0))
+        .isInstanceOf(BoardMoveException.class)
+        .hasMessage("Game has ended. Player ONE won.");
+      assertThat(moved.pits()).containsExactly(result);
+    }
+
+    @Test
+    void player_two_wins() {
+      final var initialization = new Integer[]{1, 2, 0, 1, 1, 0};
+      final var result = new Integer[]{1, 0, 1, 0, 0, 3};
+
+      sut.initialize(initialization);
+      sut.moveStonesFrom(1);
+      sut.moveStonesFrom(4);
+      sut.moveStonesFrom(3);
+      final var moved = sut.moveStonesFrom(4);
+
+      assertThatThrownBy(() -> sut.moveStonesFrom(0))
+        .isInstanceOf(BoardMoveException.class)
+        .hasMessage("Game has ended. Player TWO won.");
       assertThat(moved.pits()).containsExactly(result);
     }
   }
