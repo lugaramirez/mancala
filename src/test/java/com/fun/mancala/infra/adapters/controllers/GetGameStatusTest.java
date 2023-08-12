@@ -1,11 +1,13 @@
 package com.fun.mancala.infra.adapters.controllers;
 
 import com.fun.mancala.application.GameManager;
+import com.fun.mancala.application.exceptions.BoardInitializationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class GetGameStatusTest {
   private GetGameStatus sut;
@@ -17,6 +19,14 @@ class GetGameStatusTest {
     game.clearGame();
     game.initialize(new Integer[]{1, 1, 0, 1, 1, 0});
     sut = new GetGameStatus(game);
+  }
+
+  @Test
+  void uninitialized_board_throws_exception() {
+    game.clearGame();
+    assertThatThrownBy(() -> sut.getGameStatus())
+      .isInstanceOf(BoardInitializationException.class)
+      .hasMessage("The board has not been initialized yet.");
   }
 
   @Test

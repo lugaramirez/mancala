@@ -127,6 +127,8 @@ public class GameManager {
   }
 
   public String gameStatus() {
+    if (board == null)
+      throw new BoardInitializationException("The board has not been initialized yet.");
     final var gameStatus = status.equals(PLAYABLE)? "Current" : "Final";
     final var playerOneScore = board.pits()[playerOneBase];
     final var playerTwoScore = board.pits()[playerTwoBase];

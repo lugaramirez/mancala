@@ -5,7 +5,9 @@ import com.fun.mancala.application.exceptions.BoardInitializationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
+@RestController
 public class PostGameInitialization {
   private final GameManager gameManager;
 

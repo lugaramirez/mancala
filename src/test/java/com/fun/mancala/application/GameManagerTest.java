@@ -307,6 +307,13 @@ class GameManagerTest {
   @Nested
   class ReportGameStatus {
     @Test
+    void uninitialized_board_throws_exception() {
+      assertThatThrownBy(() -> sut.gameStatus())
+        .isInstanceOf(BoardInitializationException.class)
+        .hasMessage("The board has not been initialized yet.");
+    }
+
+    @Test
     void game_status_playable_game_player_one_turn() {
       final var initialization = new Integer[]{1, 1, 0, 1, 1, 0};
 
