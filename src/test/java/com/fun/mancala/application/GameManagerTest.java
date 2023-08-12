@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class GameManagerTest {
-  final private GameManager sut = new GameManager();
+  private final GameManager sut = new GameManager();
 
   @Nested
   class BoardInitialization {
@@ -32,12 +32,15 @@ class GameManagerTest {
       final var badlyPositionedEmptyPits = new Integer[]{1, 1, 0, 0, 1, 1};
       final var goodBoard = new Integer[]{1, 1, 0, 1, 1, 0};
 
+      assertThatThrownBy(() -> sut.initialize(null))
+        .isInstanceOf(BoardInitializationException.class)
+        .hasMessage("Provide an initial state to the board.");
       assertThatThrownBy(() -> sut.initialize(oddNumberOfPits))
         .isInstanceOf(BoardInitializationException.class)
         .hasMessage("The amount of pits on board should be even.");
       assertThatThrownBy(() -> sut.initialize(boardTooSmall))
         .isInstanceOf(BoardInitializationException.class)
-        .hasMessage("The board should have at least three pits per player.");
+        .hasMessage("The board should have at least two pits plus a base per player.");
       assertThatThrownBy(() -> sut.initialize(wrongAmountOfEmptyPits))
         .isInstanceOf(BoardInitializationException.class)
         .hasMessage("The board should have only two empty pits at the right of each player.");
@@ -50,6 +53,26 @@ class GameManagerTest {
       })
         .isInstanceOf(BoardInitializationException.class)
         .hasMessage("The board is already initialized.");
+    }
+
+    @Test
+    void initialize_clear_and_initialize_works() {
+      final var initialization = new Integer[]{6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 0};
+
+      sut.initialize(initialization);
+      sut.clearGame();
+      final var board = sut.initialize(initialization);
+
+      assertThat(board.pits()).isInstanceOf(Integer[].class);
+      assertThat(board.pits()).hasSize(initialization.length);
+      assertThat(board.pits()).containsExactly(initialization);
+    }
+
+    @Test
+    void movement_on_uninitialized_board_throws_exception() {
+      assertThatThrownBy(() -> sut.moveStonesFrom(0))
+        .isInstanceOf(BoardMoveException.class)
+        .hasMessage("The board has not been initialized yet.");
     }
   }
 
