@@ -19,8 +19,8 @@ By following [Jeffrey Palermo's description of the Onion Architecture][onion_arc
 Application, Domain, and Infrastructure (infra). You can find more information about them in the blog post, but the simplified
 version is that the *Application* layer contains all business logic, the *Domain* contains all business domain objects, and the
 *Infrastructure* contains the application-specific interfaces into a particular technology, e.g., Spring's `Rest Controllers`.
-The Application layer should contain *ports* that helps to connect to the outside world via implementations in the Infrastructure
-layer.
+The Application and Domain layers should contain *ports* that helps to connect to the outside world via implementations in the
+Infrastructure layer.
 
 The simple backend doesn't store any data, it keeps one game in memory in the [`GameManager` class][game_manager], that needs
 to be initialized before start playing. Then, all moves should be made by players (it does not matter which player, but
@@ -28,7 +28,7 @@ the rules on whose turn is it determines which pits can be played), until the ga
 provided. At all times the game state is accessible and in order to restart the board (once finished or mid-game) an endpoint
 is also provided for that.
 
-> Note: Requests are provided in the [`game-requests.http` file](game-requests.http)
+> Requests are provided in the [`game-requests.http` file](game-requests.http)
 
 The business rules are located in the aforementioned `GameManager` class, which is annotated as a Spring `@Service` stereotype
 that acts as the "port -> impl" connection previously mentioned. All exceptions are also described in the application layer only.
@@ -58,10 +58,10 @@ many refactors are needed in case that a controller endpoint changes or is remov
     - The minimum board size is 6, two PPs plus a BP for each player.
     - The board size should always be even, and the BPs should be in the middle and at the end of the array.
     - The amount of stones per pit is between 1 and 10 (why 10? no particular reason, just seemed reasonable :sweat_smile:).
-    > Calling any other endpoint here throws a `BoardNotInitializedException`
+      > Calling any other endpoint here throws a `BoardNotInitializedException`
 2. From here on, three endpoints are available, `/move`, `/status`, and `/clear`.
 3. The `/move` endpoint allows anyone sending requests to the service to move the stones. This endpoint receives a zero-based pit number
-   (zero-based because it is easier to use it :sweat_smile:) to move the stones in it. Depending on which "player" turn is, the `GameManager`
+   (zero-based because it is easier to use :sweat_smile:) to move the stones in it. Depending on which "player" turn is, the `GameManager`
    class will allow the movement or not.
     - If it is *Player One's* turn, only the pits from 0 to Player One's BP (non-including) are playable.
     - If it is *Player Two's* turn, only the pits from Player One's BP plus one to Player Two's BP (non-including) are playable.
@@ -69,7 +69,7 @@ many refactors are needed in case that a controller endpoint changes or is remov
     - If the last stone lands on an own empty PP, *capturing* happens, where all the stones on the opposite PP plus the one that landed
       on the empty one ends up in the current player's BP.
     - If the last stone ends up in your own BP, you get another turn.
-    > *Capturing* does not grant another turn.
+      > *Capturing* does not grant another turn.
     - At all points the `/status` endpoint can be called to check what's the status of the current game: whose turn is it, what's the board
       status, and what's the score, as well if the game is still playable or has ended.
 4. The game ends once one side is devoid of stones. This will make the `/move` endpoint to throw errors indicating who won. The final score
