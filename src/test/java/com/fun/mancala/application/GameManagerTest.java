@@ -30,6 +30,8 @@ class GameManagerTest {
       final var boardTooSmall = new Integer[]{1, 0, 1, 0};
       final var wrongAmountOfEmptyPits = new Integer[]{1, 1, 0, 1, 0, 0};
       final var badlyPositionedEmptyPits = new Integer[]{1, 1, 0, 0, 1, 1};
+      final var tooManyStones = new Integer[]{1, 20, 0, 1, 1, 0};
+      final var negativeStones = new Integer[]{-1, 20, 0, 1, 1, 0};
       final var goodBoard = new Integer[]{1, 1, 0, 1, 1, 0};
 
       assertThatThrownBy(() -> sut.initialize(null))
@@ -47,6 +49,12 @@ class GameManagerTest {
       assertThatThrownBy(() -> sut.initialize(badlyPositionedEmptyPits))
         .isInstanceOf(BoardInitializationException.class)
         .hasMessage("The board should have only two empty pits at the right of each player.");
+      assertThatThrownBy(() -> sut.initialize(tooManyStones))
+        .isInstanceOf(BoardInitializationException.class)
+        .hasMessage("There are too many stones on pit 1. The maximum amount of stones is 10. Fix the initialization board and retry.");
+      assertThatThrownBy(() -> sut.initialize(negativeStones))
+        .isInstanceOf(BoardInitializationException.class)
+        .hasMessage("There are negative amount of stones on pit 0. Fix the initialization board and retry.");
       assertThatThrownBy(() -> {
         sut.initialize(goodBoard);
         sut.initialize(goodBoard);

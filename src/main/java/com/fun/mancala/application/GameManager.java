@@ -14,6 +14,7 @@ import static com.fun.mancala.domain.models.Status.PLAYABLE;
 
 @Service
 public class GameManager {
+  private static final int MAXIMUM_STONES = 10;
   private Board board;
   private Player player;
   private Status status;
@@ -47,6 +48,10 @@ public class GameManager {
     final var p1Base = Integer.valueOf(initialBoard.length / 2 - 1);
     final var p2Base = Integer.valueOf(initialBoard.length - 1);
     for (Integer pit = 0; pit < initialBoard.length; pit++) {
+      if (initialBoard[pit].compareTo(MAXIMUM_STONES) > 0)
+        throw new BoardInitializationException("There are too many stones on pit "+ pit +". The maximum amount of stones is "+ MAXIMUM_STONES +". Fix the initialization board and retry.");
+      if (initialBoard[pit].compareTo(0) < 0)
+        throw new BoardInitializationException("There are negative amount of stones on pit "+ pit +". Fix the initialization board and retry.");
       if (initialBoard[pit].equals(0) && (++emptyPits > 2 || (!pit.equals(p1Base) && !pit.equals(p2Base))))
         throw new BoardInitializationException("The board should have only two empty pits at the right of each player.");
     }
