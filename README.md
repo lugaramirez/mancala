@@ -13,6 +13,21 @@ It uses Java as language and Spring Boot as framework for quick prototyping.
 It is an extremely simple app, intended as proof of concept, that has the ability of handling two users playing, by making
 simple requests.
 
+## Starting the service
+
+As a Spring Boot application, the rules of starting the service from the documentation applies. For any Linux or MacOS computer,
+you just need to run
+
+```shell
+./mvnw spring-boot:run
+```
+
+in order to start the service. In Windows, the command looks like:
+
+```shell
+mvnw.cmd spring-boot:run
+```
+
 ## Design
 
 By following [Jeffrey Palermo's description of the Onion Architecture][onion_arch], this service has three main packages:
