@@ -2,20 +2,20 @@ package com.fun.mancala.infra.adapters.controllers;
 
 import com.fun.mancala.application.GameManager;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class PostClearGame {
+public class DeleteGame {
   private final GameManager gameManager;
 
-  public PostClearGame(GameManager gameManager) {
+  public DeleteGame(GameManager gameManager) {
     this.gameManager = gameManager;
   }
 
-  @PostMapping("/clear")
-  public ResponseEntity<Void> postClearGame() {
+  @DeleteMapping()
+  public ResponseEntity<Void> deleteGame() {
     gameManager.clearGame();
-    return ResponseEntity.ok().build();
+    return ResponseEntity.noContent().build();
   }
 }

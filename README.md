@@ -13,21 +13,6 @@ It uses Java as language and Spring Boot as framework for quick prototyping.
 It is an extremely simple app, intended as proof of concept, that has the ability of handling two users playing, by making
 simple requests.
 
-## Starting the service
-
-As a Spring Boot application, the rules of starting the service from the documentation applies. For any Linux or MacOS computer,
-you just need to run
-
-```shell
-./mvnw spring-boot:run
-```
-
-in order to start the service. In Windows, the command looks like:
-
-```shell
-mvnw.cmd spring-boot:run
-```
-
 ## Design
 
 By following [Jeffrey Palermo's description of the Onion Architecture][onion_arch], this service has three main packages:
@@ -43,7 +28,7 @@ the rules on whose turn is it determines which pits can be played), until the ga
 provided. At all times the game state is accessible and in order to restart the board (once finished or mid-game) an endpoint
 is also provided for that.
 
-> Requests are provided in the [`game-requests.http` file](game-requests.http)
+> Requests are provided in the [`mancala-spec.yaml` OpenAPI spec file](mancala-spec.yaml)
 
 The business rules are located in the aforementioned `GameManager` class, which is annotated as a Spring `@Service` stereotype
 that acts as the "port -> impl" connection previously mentioned. All exceptions are also described in the application layer only.
@@ -112,3 +97,24 @@ Some of them were already listed above, but the summary is:
   of stones per pit, max amount of stones per player, endgame rules, etc.
 - Provide a frontend? This is always a good improvement point. As this is intended to show clean architecture, it is better to use
   [HTMx][htmx] over other frameworks at it provides websocket, AJAX, etc., in a simple and concise way.
+
+## Starting the service
+
+Make sure you have at least Java 17 installed on your computer. As a Spring Boot application, the rules of starting the service from the
+documentation applies. For any Linux or MacOS computer, you just need to run
+
+```shell
+./mvnw spring-boot:run
+```
+
+in order to start the service. In Windows, the command looks like:
+
+```shell
+mvnw.cmd spring-boot:run
+```
+
+### Playing the game
+
+By using the [`mancala-spec.yaml` OpenAPI spec file](mancala-spec.yaml), you can use any means to render and do requests via the specs,
+then just follow the rules listed in the [`Rules of the app` section.](#rules-of-the-app)
+

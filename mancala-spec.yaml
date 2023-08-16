@@ -1,0 +1,126 @@
+openapi: 3.1.0
+info:
+  version: 0.0.1
+  title: Mancala
+  description: |-
+    This very simple app tries to use the "clean X" approach pioneered by uncle Bob Martin, but takes more heavily to heart the
+    "Effective Software Testing" book, as it is approached in a TDD fashion to provide a backend for the game of [Mancala](https://en.wikipedia.org/wiki/Mancala).
+    It uses Java as language and Spring Boot as framework for quick prototyping.
+
+    It is an extremely simple app, intended as proof of concept, that has the ability of handling two users playing, by making simple requests.
+
+servers:
+  - url: http://localhost:8080
+
+paths:
+  /status:
+    get:
+      summary: Shows the current game status
+      operationId: gameStatus
+      responses:
+        '200':
+          $ref: '#/components/responses/OK'
+        '400':
+          $ref: '#/components/responses/Error'
+  /initialize:
+    post:
+      summary: Initializes the game
+      operationId: initializeGame
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: integer
+            examples:
+              board:
+                value: [1, 1, 0, 1, 1, 0]
+        required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/OK'
+        '400':
+          $ref: '#/components/responses/Error'
+  /move:
+    post:
+      summary: Move stones from the indicated pit
+      operationId: moveStonesFromPit
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: integer
+            examples:
+              pit:
+                value: 0
+        required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/OK'
+        '400':
+          $ref: '#/components/responses/Error'
+  /:
+    delete:
+      summary: Deletes a game
+      operationId: deleteGame
+      responses:
+        '204':
+          description: Game deleted
+components:
+  responses:
+    OK:
+      description: Game status
+      content:
+        text/plain:
+          schema:
+            type: string
+          examples:
+            status:
+              $ref: '#/components/examples/gameStatus'
+    Error:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+          examples:
+            error:
+              $ref: '#/components/examples/problemDetail'
+  examples:
+    gameStatus:
+      value: |
+        Current Board:
+          Player ONE: | 1 | 1 || 0 |
+          Player TWO: | 1 | 1 || 0 |
+        Current Score:
+          Player ONE: 0
+          Player TWO: 0
+        Current Player: ONE
+        Game: PLAYABLE
+    problemDetail:
+      value:
+        title: Bad request
+        type: http://localhost/errors/BoardInitializationException
+        detail: The board has not been initialized yet.
+  schemas:
+    ProblemDetail:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+          format: int32
+        detail:
+          type: string
+        instance:
+          type: string
+        extensions:
+          type: object
+          additionalProperties:
+            type: object
+            additionalProperties: {}
+          readOnly: true

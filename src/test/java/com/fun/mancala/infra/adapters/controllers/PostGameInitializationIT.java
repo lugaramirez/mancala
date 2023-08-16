@@ -3,8 +3,7 @@ package com.fun.mancala.infra.adapters.controllers;
 import com.fun.mancala.IntegrationTestsBase;
 import org.junit.jupiter.api.Test;
 
-import static io.restassured.RestAssured.given;
-import static io.restassured.RestAssured.post;
+import static io.restassured.RestAssured.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.OK;
@@ -12,7 +11,7 @@ import static org.springframework.http.HttpStatus.OK;
 class PostGameInitializationIT extends IntegrationTestsBase {
   @Test
   void given_wrong_initialization_board_response_is_problem() {
-    post("/clear").andReturn();
+    delete().andReturn();
     given().body(new Integer[]{1, 1, 0, 1, 1, 0}).post("/initialize").andReturn();
     var body = given()
       .body(3)
@@ -31,7 +30,7 @@ class PostGameInitializationIT extends IntegrationTestsBase {
 
   @Test
   void given_proper_initialization_board_response_is_200_and_game_status() {
-    post("/clear").andReturn();
+    delete().andReturn();
     given().body(new Integer[]{1, 1, 0, 1, 1, 0}).post("/initialize").andReturn();
     var body = given()
       .body(0)

@@ -11,7 +11,7 @@ import static org.springframework.http.HttpStatus.OK;
 class GetGameStatusIT extends IntegrationTestsBase {
   @Test
   void given_an_uninitialized_board_response_is_problem() {
-    post("/clear").andReturn();
+    delete().andReturn();
     var body = get("/status")
       .then()
       .assertThat()
@@ -27,7 +27,7 @@ class GetGameStatusIT extends IntegrationTestsBase {
 
   @Test
   void given_initialized_board_response_is_200_and_game_status() {
-    post("/clear").andReturn();
+    delete().andReturn();
     given().body(new Integer[]{1, 1, 0, 1, 1, 0}).post("/initialize").andReturn();
     var body = get("/status").then()
       .assertThat()

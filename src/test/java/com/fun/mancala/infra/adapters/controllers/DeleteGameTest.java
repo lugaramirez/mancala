@@ -6,11 +6,11 @@ import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class PostClearGameTest {
-  private final PostClearGame sut = new PostClearGame(new GameManager());
+class DeleteGameTest {
+  private final DeleteGame sut = new DeleteGame(new GameManager());
 
   @Test
   void initialize_board_correctly_returns_game_status() {
-    assertThat(sut.postClearGame()).isEqualTo(ResponseEntity.ok().build());
+    assertThat(sut.deleteGame()).isEqualTo(ResponseEntity.noContent().build());
   }
 }
