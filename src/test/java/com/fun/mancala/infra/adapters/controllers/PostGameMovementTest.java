@@ -2,21 +2,28 @@ package com.fun.mancala.infra.adapters.controllers;
 
 import com.fun.mancala.application.GameManager;
 import com.fun.mancala.application.exceptions.BoardMoveException;
+import com.fun.mancala.domain.ports.GamePersister;
+import com.fun.mancala.domain.ports.GameRetriever;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class PostGameMovementTest {
+  @Mock
+  private GamePersister persister;
+  @Mock
+  private GameRetriever retriever;
+  private final GameManager gameManager = new GameManager(retriever, persister);
   private PostGameMovement sut;
 
   @BeforeEach
   void initializeTest() {
-    var game = new GameManager();
-    game.initialize(new Integer[]{1, 1, 0, 1, 1, 0});
-    this.sut = new PostGameMovement(game);
+    gameManager.initialize(new Integer[]{1, 1, 0, 1, 1, 0});
+    this.sut = new PostGameMovement(gameManager);
   }
 
   @Test

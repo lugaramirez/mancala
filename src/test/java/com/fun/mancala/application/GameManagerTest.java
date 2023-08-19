@@ -2,8 +2,12 @@ package com.fun.mancala.application;
 
 import com.fun.mancala.application.exceptions.BoardInitializationException;
 import com.fun.mancala.application.exceptions.BoardMoveException;
+import com.fun.mancala.domain.ports.GamePersister;
+import com.fun.mancala.domain.ports.GameRetriever;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 
 import static com.fun.mancala.domain.models.Player.ONE;
 import static com.fun.mancala.domain.models.Player.TWO;
@@ -13,7 +17,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class GameManagerTest {
-  private final GameManager sut = new GameManager();
+  @Mock
+  private GamePersister persister;
+  @Mock
+  private GameRetriever retriever;
+  private final GameManager sut = new GameManager(retriever, persister);
 
   @Nested
   class BoardInitialization {

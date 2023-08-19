@@ -2,14 +2,22 @@ package com.fun.mancala.infra.adapters.controllers;
 
 import com.fun.mancala.application.GameManager;
 import com.fun.mancala.application.exceptions.BoardInitializationException;
+import com.fun.mancala.domain.ports.GamePersister;
+import com.fun.mancala.domain.ports.GameRetriever;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class PostGameInitializationTest {
-  private final PostGameInitialization sut = new PostGameInitialization(new GameManager());
+  @Mock
+  private GamePersister persister;
+  @Mock
+  private GameRetriever retriever;
+  private final GameManager gameManager = new GameManager(retriever, persister);
+  private final PostGameInitialization sut = new PostGameInitialization(gameManager);
 
   @Test
   void initialize_board_correctly_returns_game_status() {

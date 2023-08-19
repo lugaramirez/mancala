@@ -3,6 +3,8 @@ package com.fun.mancala.application;
 import com.fun.mancala.application.exceptions.BoardInitializationException;
 import com.fun.mancala.application.exceptions.BoardMoveException;
 import com.fun.mancala.domain.models.Game;
+import com.fun.mancala.domain.ports.GamePersister;
+import com.fun.mancala.domain.ports.GameRetriever;
 import org.springframework.stereotype.Service;
 
 import static com.fun.mancala.domain.models.Player.ONE;
@@ -13,15 +15,23 @@ import static com.fun.mancala.domain.models.Status.PLAYABLE;
 @Service
 public class GameManager {
   private static final int MAXIMUM_STONES = 10;
+  private final GameRetriever retriever;
+  private final GamePersister persister;
   private Game game;
   private Integer playerOneBase;
   private Integer playerTwoBase;
+
+  public GameManager(GameRetriever retriever, GamePersister persister) {
+    this.retriever = retriever;
+    this.persister = persister;
+  }
 
   public Game initialize(Integer[] initialBoard) throws BoardInitializationException {
     verifyInitialization(initialBoard);
     game = new Game(initialBoard);
     playerOneBase = game.getBoard().pits().length / 2 - 1;
     playerTwoBase = game.getBoard().pits().length - 1;
+
     return game;
   }
 

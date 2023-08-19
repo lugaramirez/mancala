@@ -2,28 +2,34 @@ package com.fun.mancala.infra.adapters.controllers;
 
 import com.fun.mancala.application.GameManager;
 import com.fun.mancala.application.exceptions.BoardInitializationException;
+import com.fun.mancala.domain.ports.GamePersister;
+import com.fun.mancala.domain.ports.GameRetriever;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class GetGameStatusTest {
+  @Mock
+  private GamePersister persister;
+  @Mock
+  private GameRetriever retriever;
+  private final GameManager gameManager = new GameManager(retriever, persister);
   private GetGameStatus sut;
-
-  private final GameManager game = new GameManager();
 
   @BeforeEach
   void initializeTest() {
-    game.clearGame();
-    game.initialize(new Integer[]{1, 1, 0, 1, 1, 0});
-    sut = new GetGameStatus(game);
+    gameManager.clearGame();
+    gameManager.initialize(new Integer[]{1, 1, 0, 1, 1, 0});
+    sut = new GetGameStatus(gameManager);
   }
 
   @Test
   void uninitialized_board_throws_exception() {
-    game.clearGame();
+    gameManager.clearGame();
     assertThatThrownBy(() -> sut.getGameStatus())
       .isInstanceOf(BoardInitializationException.class)
       .hasMessage("The board has not been initialized yet.");
@@ -45,7 +51,7 @@ class GetGameStatusTest {
 
   @Test
   void player_two_should_play_second() {
-    game.moveStonesFrom(0);
+    gameManager.moveStonesFrom(0);
 
     assertThat(sut.getGameStatus()).isEqualTo(ResponseEntity.ok("""
       Current Board:
@@ -61,8 +67,8 @@ class GetGameStatusTest {
 
   @Test
   void game_status_done_player_one_wins() {
-    game.moveStonesFrom(1);
-    game.moveStonesFrom(0);
+    gameManager.moveStonesFrom(1);
+    gameManager.moveStonesFrom(0);
 
     assertThat(sut.getGameStatus()).isEqualTo(ResponseEntity.ok("""
         Final Board:
@@ -78,9 +84,9 @@ class GetGameStatusTest {
 
   @Test
   void game_status_done_player_two_wins() {
-    game.moveStonesFrom(0);
-    game.moveStonesFrom(4);
-    game.moveStonesFrom(3);
+    gameManager.moveStonesFrom(0);
+    gameManager.moveStonesFrom(4);
+    gameManager.moveStonesFrom(3);
 
     assertThat(sut.getGameStatus()).isEqualTo(ResponseEntity.ok("""
         Final Board:
