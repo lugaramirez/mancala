@@ -18,12 +18,12 @@ public class GameSpringRepository implements GameRetriever, GamePersister {
   }
 
   @Override
-  public boolean persist(Game.State gameState) {
+  public boolean persist(Game gameState) {
     var gameEntity = new com.fun.mancala.infra.adapters.persitence.entities.Game(
-      gameState.id(),
-      Arrays.asList(gameState.board().pits()),
-      gameState.player(),
-      gameState.status()
+      gameState.getId(),
+      Arrays.asList(gameState.getBoard().pits()),
+      gameState.getPlayer(),
+      gameState.getStatus()
     );
     gameRepository.save(gameEntity);
     return true;

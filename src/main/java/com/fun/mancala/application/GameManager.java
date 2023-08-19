@@ -29,9 +29,12 @@ public class GameManager {
   public Game initialize(Integer[] initialBoard) throws BoardInitializationException {
     verifyInitialization(initialBoard);
     game = new Game(initialBoard);
+    if (!persister.persist(game)) {
+      game = null;
+      throw new BoardInitializationException("The board could not be initialized. Please try again.");
+    }
     playerOneBase = game.getBoard().pits().length / 2 - 1;
     playerTwoBase = game.getBoard().pits().length - 1;
-
     return game;
   }
 

@@ -2,26 +2,25 @@ package com.fun.mancala.infra.adapters.controllers;
 
 import com.fun.mancala.application.GameManager;
 import com.fun.mancala.application.exceptions.BoardInitializationException;
-import com.fun.mancala.domain.ports.GamePersister;
-import com.fun.mancala.domain.ports.GameRetriever;
+import com.fun.mancala.infra.adapters.persitence.GameSpringRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class GetGameStatusTest {
-  @Mock
-  private GamePersister persister;
-  @Mock
-  private GameRetriever retriever;
-  private final GameManager gameManager = new GameManager(retriever, persister);
+  private final GameSpringRepository db = mock();
+  private final GameManager gameManager = new GameManager(db, db);
   private GetGameStatus sut;
 
   @BeforeEach
   void initializeTest() {
+    when(db.persist(any())).thenReturn(true);
     gameManager.clearGame();
     gameManager.initialize(new Integer[]{1, 1, 0, 1, 1, 0});
     sut = new GetGameStatus(gameManager);

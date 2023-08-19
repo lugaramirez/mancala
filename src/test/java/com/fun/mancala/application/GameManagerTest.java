@@ -2,12 +2,10 @@ package com.fun.mancala.application;
 
 import com.fun.mancala.application.exceptions.BoardInitializationException;
 import com.fun.mancala.application.exceptions.BoardMoveException;
-import com.fun.mancala.domain.ports.GamePersister;
-import com.fun.mancala.domain.ports.GameRetriever;
+import com.fun.mancala.infra.adapters.persitence.GameSpringRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 
 import static com.fun.mancala.domain.models.Player.ONE;
 import static com.fun.mancala.domain.models.Player.TWO;
@@ -15,13 +13,18 @@ import static com.fun.mancala.domain.models.Status.DONE;
 import static com.fun.mancala.domain.models.Status.PLAYABLE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class GameManagerTest {
-  @Mock
-  private GamePersister persister;
-  @Mock
-  private GameRetriever retriever;
-  private final GameManager sut = new GameManager(retriever, persister);
+  private final GameSpringRepository db = mock();
+  private final GameManager sut = new GameManager(db, db);
+
+  @BeforeEach
+  void mockPersistence() {
+    when(db.persist(any())).thenReturn(true);
+  }
 
   @Nested
   class BoardInitialization {
@@ -73,6 +76,16 @@ class GameManagerTest {
       })
         .isInstanceOf(BoardInitializationException.class)
         .hasMessage("The board is already initialized.");
+    }
+
+    @Test
+    void initializing_board_with_correct_configuration_but_DB_issue_throws_exception() {
+      final var goodBoard = new Integer[]{1, 1, 0, 1, 1, 0};
+      when(db.persist(any())).thenReturn(false);
+
+      assertThatThrownBy(() -> sut.initialize(goodBoard))
+        .isInstanceOf(BoardInitializationException.class)
+        .hasMessage("The board could not be initialized. Please try again.");
     }
 
     @Test

@@ -2,26 +2,25 @@ package com.fun.mancala.infra.adapters.controllers;
 
 import com.fun.mancala.application.GameManager;
 import com.fun.mancala.application.exceptions.BoardInitializationException;
-import com.fun.mancala.domain.ports.GamePersister;
-import com.fun.mancala.domain.ports.GameRetriever;
+import com.fun.mancala.infra.adapters.persitence.GameSpringRepository;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class PostGameInitializationTest {
-  @Mock
-  private GamePersister persister;
-  @Mock
-  private GameRetriever retriever;
-  private final GameManager gameManager = new GameManager(retriever, persister);
+  private final GameSpringRepository db = mock();
+  private final GameManager gameManager = new GameManager(db, db);
   private final PostGameInitialization sut = new PostGameInitialization(gameManager);
 
   @Test
   void initialize_board_correctly_returns_game_status() {
     final var board = new Integer[]{1, 1, 0, 1, 1, 0};
+    when(db.persist(any())).thenReturn(true);
 
     final var response = sut.postGameInitialization(board);
 
@@ -44,6 +43,7 @@ class PostGameInitializationTest {
     final var wrongAmountOfEmptyPits = new Integer[]{1, 1, 0, 1, 0, 0};
     final var badlyPositionedEmptyPits = new Integer[]{1, 1, 0, 0, 1, 1};
     final var goodBoard = new Integer[]{1, 1, 0, 1, 1, 0};
+    when(db.persist(any())).thenReturn(true);
 
     assertThatThrownBy(() -> sut.postGameInitialization(null))
       .isInstanceOf(BoardInitializationException.class)
