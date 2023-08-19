@@ -2,9 +2,7 @@ package com.fun.mancala.application;
 
 import com.fun.mancala.application.exceptions.BoardInitializationException;
 import com.fun.mancala.application.exceptions.BoardMoveException;
-import com.fun.mancala.domain.models.Board;
-import com.fun.mancala.domain.models.Player;
-import com.fun.mancala.domain.models.Status;
+import com.fun.mancala.domain.models.Game;
 import org.springframework.stereotype.Service;
 
 import static com.fun.mancala.domain.models.Player.ONE;
@@ -15,28 +13,24 @@ import static com.fun.mancala.domain.models.Status.PLAYABLE;
 @Service
 public class GameManager {
   private static final int MAXIMUM_STONES = 10;
-  private Board board;
-  private Player player;
-  private Status status;
+  private Game game;
   private Integer playerOneBase;
   private Integer playerTwoBase;
 
-  public Board initialize(Integer[] initialBoard) throws BoardInitializationException {
+  public Game initialize(Integer[] initialBoard) throws BoardInitializationException {
     verifyInitialization(initialBoard);
-    board = new Board(initialBoard);
-    player = ONE;
-    status = PLAYABLE;
-    playerOneBase = board.pits().length / 2 - 1;
-    playerTwoBase = board.pits().length - 1;
-    return board;
+    game = new Game(initialBoard);
+    playerOneBase = game.getBoard().pits().length / 2 - 1;
+    playerTwoBase = game.getBoard().pits().length - 1;
+    return game;
   }
 
   public void clearGame() {
-    board = null;
+    this.game = null;
   }
 
   private void verifyInitialization(Integer[] initialBoard) throws BoardInitializationException {
-    if (board != null)
+    if (game != null)
       throw new BoardInitializationException("The board is already initialized.");
     if (initialBoard == null)
       throw new BoardInitializationException("Provide an initial state to the board.");
@@ -57,56 +51,56 @@ public class GameManager {
     }
   }
 
-  public Board moveStonesFrom(Integer pit) throws BoardMoveException {
+  public Game moveStonesFrom(Integer pit) throws BoardMoveException {
     validateMoveFrom(pit);
 
-    var stones = board.pits()[pit];
+    var stones = game.getBoard().pits()[pit];
     Integer lastModifiedPitStoneCount = null;
-    board.pits()[pit] = 0;
+    game.getBoard().pits()[pit] = 0;
     while (stones > 0) {
       ++pit;
-      if ((player.equals(ONE) && pit.equals(playerTwoBase)) || (player.equals(TWO) && pit.equals(playerOneBase)))
+      if ((game.getPlayer().equals(ONE) && pit.equals(playerTwoBase)) || (game.getPlayer().equals(TWO) && pit.equals(playerOneBase)))
         ++pit;
-      if (pit >= board.pits().length) pit = 0;
+      if (pit >= game.getBoard().pits().length) pit = 0;
       stones--;
-      lastModifiedPitStoneCount = board.pits()[pit];
-      board.pits()[pit]++;
+      lastModifiedPitStoneCount = game.getBoard().pits()[pit];
+      game.getBoard().pits()[pit]++;
     }
 
     captureStonesIfApplicable(pit, lastModifiedPitStoneCount);
     rotatePlayerIfApplicable(pit);
-    return board;
+    return game;
   }
 
   private void validateMoveFrom(Integer pit) throws BoardMoveException {
-    if (board == null)
+    if (game == null)
       throw new BoardMoveException("The board has not been initialized yet.");
-    if (status.equals(DONE))
-      throw new BoardMoveException("Game has ended. Player " + player + " won.");
-    if ((player.equals(ONE) && pit.equals(playerOneBase)) || (player.equals(TWO) && pit.equals(playerTwoBase)))
+    if (game.getStatus().equals(DONE))
+      throw new BoardMoveException("Game has ended. Player " + game.getPlayer() + " won.");
+    if ((game.getPlayer().equals(ONE) && pit.equals(playerOneBase)) || (game.getPlayer().equals(TWO) && pit.equals(playerTwoBase)))
       throw new BoardMoveException("The stones at the base should not be moved.");
-    if ((player.equals(ONE) && pit > playerOneBase) || (player.equals(TWO) && pit <= playerOneBase))
+    if ((game.getPlayer().equals(ONE) && pit > playerOneBase) || (game.getPlayer().equals(TWO) && pit <= playerOneBase))
       throw new BoardMoveException("Those stones are not yours to move.");
-    if (board.pits()[pit].equals(0))
+    if (game.getBoard().pits()[pit].equals(0))
       throw new BoardMoveException("Choose a pit with stones.");
   }
 
   private void captureStonesIfApplicable(Integer pit, Integer lastModifiedPitStoneCount) {
     if (!pit.equals(playerOneBase) && !pit.equals(playerTwoBase) &&
       lastModifiedPitStoneCount != null && lastModifiedPitStoneCount.equals(0) &&
-      ((player.equals(ONE) && pit < playerOneBase) || (player.equals(TWO) && pit > playerOneBase))
+      ((game.getPlayer().equals(ONE) && pit < playerOneBase) || (game.getPlayer().equals(TWO) && pit > playerOneBase))
     ) {
-      var capturedPit = switch (player) {
+      var capturedPit = switch (game.getPlayer()) {
         // oh, math... Y U DO BE LIKE DAT?!
         case ONE -> pit + playerOneBase + 1;
         case TWO -> pit - playerOneBase - 1;
       };
-      var capturedStones = board.pits()[capturedPit] + board.pits()[pit];
-      board.pits()[pit] = 0;
-      board.pits()[capturedPit] = 0;
-      switch (player) {
-        case ONE -> board.pits()[playerOneBase] += capturedStones;
-        case TWO -> board.pits()[playerTwoBase] += capturedStones;
+      var capturedStones = game.getBoard().pits()[capturedPit] + game.getBoard().pits()[pit];
+      game.getBoard().pits()[pit] = 0;
+      game.getBoard().pits()[capturedPit] = 0;
+      switch (game.getPlayer()) {
+        case ONE -> game.getBoard().pits()[playerOneBase] += capturedStones;
+        case TWO -> game.getBoard().pits()[playerTwoBase] += capturedStones;
       }
     }
   }
@@ -115,36 +109,38 @@ public class GameManager {
     var stonesOnPlayerOnePits = 0;
     var stonesOnPlayerTwoPits = 0;
     for (int i = 0; i < playerOneBase; i++) {
-      stonesOnPlayerOnePits += board.pits()[i];
-      stonesOnPlayerTwoPits += board.pits()[i + playerOneBase + 1];
+      stonesOnPlayerOnePits += game.getBoard().pits()[i];
+      stonesOnPlayerTwoPits += game.getBoard().pits()[i + playerOneBase + 1];
     }
     if (stonesOnPlayerOnePits == 0 || stonesOnPlayerTwoPits == 0) {
-      status = DONE;
+      game.setStatus(DONE);
     } else {
-      if ((player.equals(ONE) && !pit.equals(playerOneBase)) ||
-        (player.equals(TWO) && !pit.equals(playerTwoBase))) {
-        player = switch (player) {
-          case ONE -> TWO;
-          case TWO -> ONE;
-        };
+      if ((game.getPlayer().equals(ONE) && !pit.equals(playerOneBase)) ||
+        (game.getPlayer().equals(TWO) && !pit.equals(playerTwoBase))) {
+        game.setPlayer(
+          switch (game.getPlayer()) {
+            case ONE -> TWO;
+            case TWO -> ONE;
+          }
+        );
       }
     }
   }
 
   public String gameStatus() {
-    if (board == null)
+    if (game == null)
       throw new BoardInitializationException("The board has not been initialized yet.");
-    final var gameStatus = status.equals(PLAYABLE)? "Current" : "Final";
-    final var playerOneScore = board.pits()[playerOneBase];
-    final var playerTwoScore = board.pits()[playerTwoBase];
+    final var gameStatus = game.getStatus().equals(PLAYABLE)? "Current" : "Final";
+    final var playerOneScore = game.getBoard().pits()[playerOneBase];
+    final var playerTwoScore = game.getBoard().pits()[playerTwoBase];
     StringBuilder playerOneBoard = new StringBuilder();
     StringBuilder playerTwoBoard = new StringBuilder();
     for (int i = 0; i < playerOneBase; i++) {
-      playerOneBoard.append("| %d ".formatted(board.pits()[i]));
-      playerTwoBoard.append("| %d ".formatted(board.pits()[i + playerOneBase + 1]));
+      playerOneBoard.append("| %d ".formatted(game.getBoard().pits()[i]));
+      playerTwoBoard.append("| %d ".formatted(game.getBoard().pits()[i + playerOneBase + 1]));
     }
-    playerOneBoard.append("|| %d |".formatted(board.pits()[playerOneBase]));
-    playerTwoBoard.append("|| %d |".formatted(board.pits()[playerTwoBase]));
+    playerOneBoard.append("|| %d |".formatted(game.getBoard().pits()[playerOneBase]));
+    playerTwoBoard.append("|| %d |".formatted(game.getBoard().pits()[playerTwoBase]));
     return """
       %s Board:
         Player ONE: %s
@@ -162,8 +158,8 @@ public class GameManager {
       playerOneScore,
       playerTwoScore,
       gameStatus,
-      player,
-      status
+      game.getPlayer(),
+      game.getStatus()
     );
   }
 }

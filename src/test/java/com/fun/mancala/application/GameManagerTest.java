@@ -5,6 +5,10 @@ import com.fun.mancala.application.exceptions.BoardMoveException;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.fun.mancala.domain.models.Player.ONE;
+import static com.fun.mancala.domain.models.Player.TWO;
+import static com.fun.mancala.domain.models.Status.DONE;
+import static com.fun.mancala.domain.models.Status.PLAYABLE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -17,11 +21,11 @@ class GameManagerTest {
     void initial_state_of_board_is_correctly_passed() {
       final var initialization = new Integer[]{6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 0};
 
-      final var board = sut.initialize(initialization);
+      final var game = sut.initialize(initialization);
 
-      assertThat(board.pits()).isInstanceOf(Integer[].class);
-      assertThat(board.pits()).hasSize(initialization.length);
-      assertThat(board.pits()).containsExactly(initialization);
+      assertThat(game.getBoard().pits()).containsExactly(initialization);
+      assertThat(game.getPlayer()).isEqualTo(ONE);
+      assertThat(game.getStatus()).isEqualTo(PLAYABLE);
     }
 
     @Test
@@ -69,11 +73,11 @@ class GameManagerTest {
 
       sut.initialize(initialization);
       sut.clearGame();
-      final var board = sut.initialize(initialization);
+      final var game = sut.initialize(initialization);
 
-      assertThat(board.pits()).isInstanceOf(Integer[].class);
-      assertThat(board.pits()).hasSize(initialization.length);
-      assertThat(board.pits()).containsExactly(initialization);
+      assertThat(game.getBoard().pits()).containsExactly(initialization);
+      assertThat(game.getPlayer()).isEqualTo(ONE);
+      assertThat(game.getStatus()).isEqualTo(PLAYABLE);
     }
 
     @Test
@@ -92,9 +96,11 @@ class GameManagerTest {
       final var result = new Integer[]{0, 3, 1, 2, 2, 0};
 
       sut.initialize(initialization);
-      final var moved = sut.moveStonesFrom(0);
+      final var game = sut.moveStonesFrom(0);
 
-      assertThat(moved.pits()).containsExactly(result);
+      assertThat(game.getBoard().pits()).containsExactly(result);
+      assertThat(game.getPlayer()).isEqualTo(ONE);
+      assertThat(game.getStatus()).isEqualTo(PLAYABLE);
     }
 
     @Test
@@ -188,9 +194,11 @@ class GameManagerTest {
 
       sut.initialize(initialization);
       sut.moveStonesFrom(1);
-      final var moved = sut.moveStonesFrom(4);
+      final var game = sut.moveStonesFrom(4);
 
-      assertThat(moved.pits()).containsExactly(result);
+      assertThat(game.getBoard().pits()).containsExactly(result);
+      assertThat(game.getPlayer()).isEqualTo(ONE);
+      assertThat(game.getStatus()).isEqualTo(PLAYABLE);
     }
 
     @Test
@@ -223,9 +231,11 @@ class GameManagerTest {
       final var result = new Integer[]{3, 0, 5, 3, 0, 0};
 
       sut.initialize(initialization);
-      final var moved = sut.moveStonesFrom(1);
+      final var game = sut.moveStonesFrom(1);
 
-      assertThat(moved.pits()).containsExactly(result);
+      assertThat(game.getBoard().pits()).containsExactly(result);
+      assertThat(game.getPlayer()).isEqualTo(TWO);
+      assertThat(game.getStatus()).isEqualTo(PLAYABLE);
     }
 
     @Test
@@ -235,9 +245,11 @@ class GameManagerTest {
 
       sut.initialize(initialization);
       sut.moveStonesFrom(1);
-      final var moved = sut.moveStonesFrom(4);
+      final var game = sut.moveStonesFrom(4);
 
-      assertThat(moved.pits()).containsExactly(result);
+      assertThat(game.getBoard().pits()).containsExactly(result);
+      assertThat(game.getPlayer()).isEqualTo(ONE);
+      assertThat(game.getStatus()).isEqualTo(PLAYABLE);
     }
 
     @Test
@@ -247,9 +259,11 @@ class GameManagerTest {
 
       sut.initialize(initialization);
       sut.moveStonesFrom(1);
-      final var moved = sut.moveStonesFrom(3);
+      final var game = sut.moveStonesFrom(3);
 
-      assertThat(moved.pits()).containsExactly(result);
+      assertThat(game.getBoard().pits()).containsExactly(result);
+      assertThat(game.getPlayer()).isEqualTo(ONE);
+      assertThat(game.getStatus()).isEqualTo(PLAYABLE);
     }
 
     @Test
@@ -258,9 +272,11 @@ class GameManagerTest {
       final var result = new Integer[]{3, 0, 1, 3, 3, 0};
 
       sut.initialize(initialization);
-      final var moved = sut.moveStonesFrom(1);
+      final var game = sut.moveStonesFrom(1);
 
-      assertThat(moved.pits()).containsExactly(result);
+      assertThat(game.getBoard().pits()).containsExactly(result);
+      assertThat(game.getPlayer()).isEqualTo(TWO);
+      assertThat(game.getStatus()).isEqualTo(PLAYABLE);
     }
 
     @Test
@@ -270,9 +286,11 @@ class GameManagerTest {
 
       sut.initialize(initialization);
       sut.moveStonesFrom(1);
-      final var moved = sut.moveStonesFrom(4);
+      final var game = sut.moveStonesFrom(4);
 
-      assertThat(moved.pits()).containsExactly(result);
+      assertThat(game.getBoard().pits()).containsExactly(result);
+      assertThat(game.getPlayer()).isEqualTo(ONE);
+      assertThat(game.getStatus()).isEqualTo(PLAYABLE);
     }
   }
 
@@ -286,12 +304,14 @@ class GameManagerTest {
       sut.initialize(initialization);
       sut.moveStonesFrom(1);
       sut.moveStonesFrom(0);
-      final var moved = sut.moveStonesFrom(1);
+      final var game = sut.moveStonesFrom(1);
 
       assertThatThrownBy(() -> sut.moveStonesFrom(0))
         .isInstanceOf(BoardMoveException.class)
         .hasMessage("Game has ended. Player ONE won.");
-      assertThat(moved.pits()).containsExactly(result);
+      assertThat(game.getBoard().pits()).containsExactly(result);
+      assertThat(game.getPlayer()).isEqualTo(ONE);
+      assertThat(game.getStatus()).isEqualTo(DONE);
     }
 
     @Test
@@ -303,12 +323,14 @@ class GameManagerTest {
       sut.moveStonesFrom(1);
       sut.moveStonesFrom(4);
       sut.moveStonesFrom(3);
-      final var moved = sut.moveStonesFrom(4);
+      final var game = sut.moveStonesFrom(4);
 
       assertThatThrownBy(() -> sut.moveStonesFrom(0))
         .isInstanceOf(BoardMoveException.class)
         .hasMessage("Game has ended. Player TWO won.");
-      assertThat(moved.pits()).containsExactly(result);
+      assertThat(game.getBoard().pits()).containsExactly(result);
+      assertThat(game.getPlayer()).isEqualTo(TWO);
+      assertThat(game.getStatus()).isEqualTo(DONE);
     }
   }
 
@@ -316,7 +338,7 @@ class GameManagerTest {
   class ReportGameStatus {
     @Test
     void uninitialized_board_throws_exception() {
-      assertThatThrownBy(() -> sut.gameStatus())
+      assertThatThrownBy(sut::gameStatus)
         .isInstanceOf(BoardInitializationException.class)
         .hasMessage("The board has not been initialized yet.");
     }
